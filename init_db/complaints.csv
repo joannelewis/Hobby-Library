@@ -1,0 +1,3 @@
+complaint_id,loan_id,lender_id,complaint_date,description,image_url,status
+1,1,2,2024-07-08,Needles returned broken.,http://example.com/broken_needles.jpg,open
+2,3,1,2024-07-22,Hammer handle cracked.,http://example.com/cracked_hammer.jpg,open

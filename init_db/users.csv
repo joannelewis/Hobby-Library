@@ -1,0 +1,5 @@
+user_id,username,password,email,role,location
+1,john_doe,hashed_password_1,john.doe@example.com,borrower,New York
+2,jane_smith,hashed_password_2,jane.smith@example.com,lender,Los Angeles
+3,admin_user,hashed_password_3,admin@example.com,administrator,Chicago
+4,lender_borrower,hashed_password_4,both@example.com,"lender, borrower",Houston

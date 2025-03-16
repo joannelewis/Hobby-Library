@@ -1,0 +1,7 @@
+listing_id,equipment_id,name,quantity,deposit_amount,lender_id,lender_username,location
+1,1,Knitting Needles,2,10,2,jane_smith,Los Angeles
+2,2,Crock Pot,1,25,2,jane_smith,Los Angeles
+3,3,Drill,1,30,4,lender_borrower,Houston
+4,4,Extension Cord,1,5,4,lender_borrower,Houston
+5,5,Hammer,1,15,1,john_doe,New York
+6,6,Screwdriver Set,1,12,1,john_doe,New York

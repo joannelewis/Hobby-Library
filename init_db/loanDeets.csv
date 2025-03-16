@@ -1,0 +1,4 @@
+loan_id,equipment_name,borrower_username,lender_username,start_date,end_date,deposit_amount,deposit_returned
+1,Knitting Needles,john_doe,jane_smith,2024-07-01,2024-07-08,10,0
+2,Drill,john_doe,lender_borrower,2024-07-05,2024-07-12,30,0
+3,Hammer,jane_smith,john_doe,2024-07-15,2024-07-22,15,0

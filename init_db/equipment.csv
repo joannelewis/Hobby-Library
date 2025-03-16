@@ -1,0 +1,7 @@
+equipment_id,user_id,name,quantity,deposit_amount,equipment_id,description,category
+1,2,Knitting Needles,2,10,1,1 pair of knitting needles,knitting
+2,2,Crock Pot,1,25,2,1 pair of knitting needles,knitting
+3,4,Drill,1,30,3,1 pair of knitting needles,knitting
+4,4,Extension Cord,1,5,4,1 pair of knitting needles,knitting
+5,1,Hammer,1,15,5,1 pair of knitting needles,knitting
+6,1,Screwdriver Set,1,12,6,4 fancy paintbrushes,painting
