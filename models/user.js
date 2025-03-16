@@ -1,95 +1,117 @@
-const sqlite3 = require('sqlite3').verbose();
+export class User {
+  #db;
+  #setUserSQL = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+  #getUserByIdSQL = 'SELECT * FROM users WHERE user_id = ?';
+  #getUserByUsernameSQL = 'SELECT * FROM users WHERE username = ?';
+  #getUserByEmailSQL = 'SELECT * FROM users WHERE email = ?';
+  #getUserByRoleSQL = 'SELECT * FROM users WHERE role = ?';
+  #getUserByLocationSQL = 'SELECT * FROM users WHERE location = ?';
+  #getAllUsersSQL = 'SELECT * FROM users';
 
-// Database setup
+  constructor(database) {
+    this.#db = database;
 
-const GetUserClass = () => {
-  let db;
-  const setUserSQL = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-  const getUserByIdSQL = 'SELECT username FROM users WHERE user_id = ?';
-  const getUserByUsernameSQL = 'SELECT username FROM users WHERE username = ?';
-  const getUserByEmailSQL = 'SELECT username FROM users WHERE email = ?';
-  const getUserByRoleSQL = 'SELECT username FROM users WHERE role = ?';
-  const getUserByLocationSQL = 'SELECT username FROM users WHERE location = ?';
+    this.createUserStatement = this.#db.prepare(this.#setUserSQL);
+    this.getUserByIdStatement = this.#db.prepare(this.#getUserByIdSQL);
+    this.getUserByUsernameStatement = this.#db.prepare(this.#getUserByUsernameSQL);
+    this.getUserByEmailStatement = this.#db.prepare(this.#getUserByEmailSQL);
+    this.getUserByRoleStatement = this.#db.prepare(this.#getUserByRoleSQL);
+    this.getUserByLocationStatement = this.#db.prepare(this.#getUserByLocationSQL);
+    this.getAllUsersStatement = this.#db.prepare(this.#getAllUsersSQL);
+  }
 
-  class User {
-    constructor() {
-      db = new sqlite3.Database('./database.db', (err) => {
+  async createUser(username, email, password) {
+    return new Promise((resolve, reject) => {
+      this.createUserStatement.reset();
+      this.createUserStatement.run(username, email, password, (err) => {
+        console.log("started Create")
         if (err) {
           console.error(err.message);
+          console.log("started Create e")
+          reject(err);
         }
-        console.log('Connected to the SQLite database.');
+        console.log("started Create s")
+        resolve()
       });
+    });
+  };
 
-      this.setUser = db.prepare(setUserSQL);
-      this.getUserById = db.prepare(getUserByIdSQL);
-      this.getUserByUsername = db.prepare(getUserByUsernameSQL);
-      this.getUserByEmail = db.prepare(getUserByEmailSQL);
-      this.getUserByRole = db.prepare(getUserByRoleSQL);
-      this.getUserByLocation = db.prepare(getUserByLocationSQL);
-    }
-
-
-    createUser(username, email, password) {
-      let user;
-      this.createUser.reset();
-      this.setUser.run(username, email, password, (err) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    };
-
-    getUserById(id) {
-      let user;
-      this.getUserById.reset();
-      this.getUserById.get(id, (err, row) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    }
-
-    getUserByUsername(username) {
-      let user;
-      this.getUserByUsername.reset();
-      this.getUserByUsername.get(username, (err, row) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    }
-
-    getUserByEmail(email) {
-      let user;
-      this.getUserByEmail.reset();
-      this.getUserByEmail.get(email, (err, row) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    }
-
-    getUserByRole(role) {
-      let user;
-      this.getUserByRole.reset();
-      this.getUserByRole.get(role, (err, row) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    }
-
-    getUserByLocation(location) {
-      let user;
-      this.getUserByLocation.reset();
-      this.getUserByLocation.get(location, (err, row) => {
-        if (err) console.error(err.message);
-        user = row;
-      });
-      return user;
-    }
+  getUserById(id) {
+    let user;
+    this.getUserByIdStatement.reset();
+    this.getUserById.get(id, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        return
+      }
+      user = row;
+    });
+    return user;
   }
-};
 
+  getUserByUsername(username) {
+    let user;
+    this.getUserByUsernameStatement.reset();
+    this.getUserByUsername.get(username, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        return
+      }
+      user = row;
+    });
+    return user;
+  }
 
-module.exports = GetUserClass;
+  getUserByEmail(email) {
+    let user;
+    this.getUserByEmailStatement.reset();
+    this.getUserByEmail.get(email, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        return
+      }
+      user = row;
+    });
+    return user;
+  }
+
+  getUserByRole(role) {
+    let user;
+    this.getUserByRoleStatement.reset();
+    this.getUserByRole.get(role, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        return
+      }
+      user = row;
+    });
+    return user;
+  }
+
+  getUserByLocation(location) {
+    let user;
+    this.getUserByLocationStatement.reset();
+    this.getUserByLocation.get(location, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        return
+      }
+      user = row;
+    });
+    return user;
+  }
+
+  async getAllUsers() {
+    return new Promise((resolve, reject) => {
+      this.getAllUsersStatement.reset();
+      this.getAllUsersStatement.all((err, rows) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        }
+        resolve(rows)
+      });
+    });
+  }
+}
+

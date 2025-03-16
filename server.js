@@ -1,74 +1,91 @@
 const express = require('express');
 const mustacheExpress = require('mustache-express');
 const path = require('path');
-const userObj = require('./models/user.js');
-const User = userObj.GetUserClass();
+const sqlite3 = require('sqlite3').verbose();
+const { User } = require('./models/user'); // Changed to CommonJS require
+
+// Database setup
+const database = new sqlite3.Database('./database.db', (err) => {
+  if (err) console.error('Failed to connect to the database:', err);
+});
+
+// Create user instance
+const user = new User(database);
 
 const app = express();
 const port = 5000;
-
-// Middleware
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
 
 // Mustache setup
 app.engine('mustache', mustacheExpress());
 app.set('view engine', 'mustache');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Proper layout middleware for mustache-express
+app.use((req, res, next) => {
+  const render = res.render;
+  res.render = function (view, options) {
+    const locals = options || {};
+    render.call(this, view, locals, (err, html) => {
+      if (err) return next(err);
+      render.call(this, 'layout', { yield: html });
+    });
+  };
+  next();
+});
+
 // Routes
-
-
-app.get('/', (req, res) => {
-  User.createUser("beepboop", "penis@penis.cum", "i<3cum")
+app.get('/', (_, res) => {
   res.render('index', { message: 'Hello, Mustache!' });
 });
 
-// app.get('/users', (req, res) => {
-//   db.all('SELECT user_id, username FROM users ORDER BY 1', [], (err, rows) => {
-//     if (err) {
-//       console.error(err.message);
-//       res.status(500).send('Server error');
-//       return;
-//     }
-//     res.render('users', { users: rows });
-//   });
-// });
-//
-// app.get('/create-user', (req, res) => {
-//   res.render('create-user'); // Render the create-user form
-// });
-// const { username, email } = req.body;
-// let user_id = 0;
-//
-// if (!username || !email) {
-//   return res.status(400).send('Username and email are required.');
-// }
-//
-// db.exec('SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1', [], (err, rows) => {
-//   if (err) {
-//     console.error(err.message);
-//     return res.status(500).send('Failed to create user.');
-//   }
-//   user_id = rows[0].user_id + 1;
-// });
-//
-// db.run(
-//   'INSERT INTO users (user_id, username, email) VALUES (?, ?, ?)',
-//   [user_id, username, email],
-//   function (err) {
-//     if (err) {
-//       console.error(err.message);
-//       return res.status(500).send('Failed to create user.');
-//     }
-//     console.log(`A row has been inserted with rowid ${this.lastID}`);
-//     res.redirect('/users'); // Redirect to the users list
-//   },
-// );
-//
+app.get('/users', async (_, res) => {
+  try {
+    const users = await user.getAllUsers();
+    res.render('users', { users: users });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).send('Error fetching users');
+  }
+});
 
+app.get('/login', (_, res) => {
+  res.render('login');
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  // TODO: Implement proper login logic
+  // Example: const authenticated = await user.authenticateUser(username, password);
+
+  res.redirect('/');
+});
+
+app.get('/create-user', (_, res) => {
+  res.render('create-user');
+});
+
+app.post('/create-user', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).send('Username, email, and password are required.');
+  }
+
+  try {
+    await user.createUser(username, email, password);
+    res.redirect('/login');
+  } catch (err) {
+    console.error('Error creating user:', err);
+    res.status(500).send('Failed to create user');
+  }
+});
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server listening on http://localhost:${port}`);
 });

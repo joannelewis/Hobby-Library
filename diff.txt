@@ -1,0 +1,240 @@
+commit 87af11d9441398955f3728787f448ca15c6d081b
+Author: penis <penis@example.com>
+Date:   Fri Mar 14 01:43:08 2025 -0400
+
+    TypeError go back here to scrsht
+
+diff --git a/database.db b/database.db
+index d407cc6..22414f7 100644
+Binary files a/database.db and b/database.db differ
+diff --git a/models/user.js b/models/user.js
+new file mode 100644
+index 0000000..0658dda
+--- /dev/null
++++ b/models/user.js
+@@ -0,0 +1,95 @@
++const sqlite3 = require('sqlite3').verbose();
++
++// Database setup
++
++const GetUserClass = () => {
++  let db;
++  const setUserSQL = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
++  const getUserByIdSQL = 'SELECT username FROM users WHERE user_id = ?';
++  const getUserByUsernameSQL = 'SELECT username FROM users WHERE username = ?';
++  const getUserByEmailSQL = 'SELECT username FROM users WHERE email = ?';
++  const getUserByRoleSQL = 'SELECT username FROM users WHERE role = ?';
++  const getUserByLocationSQL = 'SELECT username FROM users WHERE location = ?';
++
++  class User {
++    constructor() {
++      db = new sqlite3.Database('./database.db', (err) => {
++        if (err) {
++          console.error(err.message);
++        }
++        console.log('Connected to the SQLite database.');
++      });
++
++      this.setUser = db.prepare(setUserSQL);
++      this.getUserById = db.prepare(getUserByIdSQL);
++      this.getUserByUsername = db.prepare(getUserByUsernameSQL);
++      this.getUserByEmail = db.prepare(getUserByEmailSQL);
++      this.getUserByRole = db.prepare(getUserByRoleSQL);
++      this.getUserByLocation = db.prepare(getUserByLocationSQL);
++    }
++
++
++    createUser(username, email, password) {
++      let user;
++      this.createUser.reset();
++      this.setUser.run(username, email, password, (err) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    };
++
++    getUserById(id) {
++      let user;
++      this.getUserById.reset();
++      this.getUserById.get(id, (err, row) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    }
++
++    getUserByUsername(username) {
++      let user;
++      this.getUserByUsername.reset();
++      this.getUserByUsername.get(username, (err, row) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    }
++
++    getUserByEmail(email) {
++      let user;
++      this.getUserByEmail.reset();
++      this.getUserByEmail.get(email, (err, row) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    }
++
++    getUserByRole(role) {
++      let user;
++      this.getUserByRole.reset();
++      this.getUserByRole.get(role, (err, row) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    }
++
++    getUserByLocation(location) {
++      let user;
++      this.getUserByLocation.reset();
++      this.getUserByLocation.get(location, (err, row) => {
++        if (err) console.error(err.message);
++        user = row;
++      });
++      return user;
++    }
++  }
++};
++
++
++module.exports = GetUserClass;
+diff --git a/server.js b/server.js
+index ef5b765..fbda34a 100644
+--- a/server.js
++++ b/server.js
+@@ -1,19 +1,12 @@
+ const express = require('express');
+-const sqlite3 = require('sqlite3').verbose();
+ const mustacheExpress = require('mustache-express');
+ const path = require('path');
++const userObj = require('./models/user.js');
++const User = userObj.GetUserClass();
+ 
+ const app = express();
+ const port = 5000;
+ 
+-// Database setup
+-const db = new sqlite3.Database('./database.db', (err) => {
+-  if (err) {
+-    console.error(err.message);
+-  }
+-  console.log('Connected to the SQLite database.');
+-});
+-
+ // Middleware
+ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+ app.use(express.static(path.join(__dirname, 'public'))); // Serve static files
+@@ -24,45 +17,56 @@ app.set('view engine', 'mustache');
+ app.set('views', path.join(__dirname, 'views'));
+ 
+ // Routes
+-app.get('/', (req, res) => {
+-  res.render('index', { message: 'Hello, Mustache!' });
+-});
+ 
+-app.get('/users', (req, res) => {
+-  db.all('SELECT user_id, username FROM users', [], (err, rows) => {
+-    if (err) {
+-      console.error(err.message);
+-      res.status(500).send('Server error');
+-      return;
+-    }
+-    res.render('users', { users: rows });
+-  });
+-});
+ 
+-app.get('/create-user', (req, res) => {
+-  res.render('create-user'); // Render the create-user form
++app.get('/', (req, res) => {
++  User.createUser("beepboop", "penis@penis.cum", "i<3cum")
++  res.render('index', { message: 'Hello, Mustache!' });
+ });
+ 
+-app.post('/create-user', (req, res) => {
+-  const { username, email } = req.body;
++// app.get('/users', (req, res) => {
++//   db.all('SELECT user_id, username FROM users ORDER BY 1', [], (err, rows) => {
++//     if (err) {
++//       console.error(err.message);
++//       res.status(500).send('Server error');
++//       return;
++//     }
++//     res.render('users', { users: rows });
++//   });
++// });
++//
++// app.get('/create-user', (req, res) => {
++//   res.render('create-user'); // Render the create-user form
++// });
++// const { username, email } = req.body;
++// let user_id = 0;
++//
++// if (!username || !email) {
++//   return res.status(400).send('Username and email are required.');
++// }
++//
++// db.exec('SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1', [], (err, rows) => {
++//   if (err) {
++//     console.error(err.message);
++//     return res.status(500).send('Failed to create user.');
++//   }
++//   user_id = rows[0].user_id + 1;
++// });
++//
++// db.run(
++//   'INSERT INTO users (user_id, username, email) VALUES (?, ?, ?)',
++//   [user_id, username, email],
++//   function (err) {
++//     if (err) {
++//       console.error(err.message);
++//       return res.status(500).send('Failed to create user.');
++//     }
++//     console.log(`A row has been inserted with rowid ${this.lastID}`);
++//     res.redirect('/users'); // Redirect to the users list
++//   },
++// );
++//
+ 
+-  if (!username || !email) {
+-    return res.status(400).send('Username and email are required.');
+-  }
+-
+-  db.run(
+-    'INSERT INTO users (username, email) VALUES (?, ?)',
+-    [username, email],
+-    function (err) {
+-      if (err) {
+-        console.error(err.message);
+-        return res.status(500).send('Failed to create user.');
+-      }
+-      console.log(`A row has been inserted with rowid ${this.lastID}`);
+-      res.redirect('/users'); // Redirect to the users list
+-    },
+-  );
+-});
+ 
+ // Start the server
+ app.listen(port, () => {
+diff --git a/views/users.mustache b/views/users.mustache
+index c1e1399..4df0d85 100644
+--- a/views/users.mustache
++++ b/views/users.mustache
+@@ -8,7 +8,7 @@
+     <h1>Users</h1>
+     <ul>
+         {{#users}}
+-        <li>{{username}} (ID: {{id}})</li>
++        <li>{{username}} (ID: {{user_id}})</li>
+         {{/users}}
+     </ul>
+     <a href="/">Back to Home</a>

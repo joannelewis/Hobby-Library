@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hobby Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#06CDD7', // The turquoise color from your wireframe
+            secondary: '#E3ABFF', // Light purple for the sidebar
+            background: '#06CDD7' // Main background color
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background min-h-screen">
+  <div class="container mx-auto px-4">
+    {{{yield}}}
+  </div>
+</body>
+</html>
