@@ -1,4 +1,8 @@
-export class User {
+/**
+ * @import {require(sqlite3).Database} Database
+ */
+
+module.exports.User = class User {
   #db;
   #setUserSQL = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
   #getUserByIdSQL = 'SELECT * FROM users WHERE user_id = ?';
@@ -7,104 +11,122 @@ export class User {
   #getUserByRoleSQL = 'SELECT * FROM users WHERE role = ?';
   #getUserByLocationSQL = 'SELECT * FROM users WHERE location = ?';
   #getAllUsersSQL = 'SELECT * FROM users';
+  #createUserStatement
+  #getUserByIdStatement
+  #getUserByUsernameStatement
+  #getUserByEmailStatement
+  #getUserByRoleStatement
+  #getUserByLocationStatement
+  #getAllUsersStatement
 
+  /**
+  * @property {Database} database
+  */
   constructor(database) {
+    if (!database) {
+      console.error(database);
+      throw new Error('Database is required');
+    }
     this.#db = database;
 
-    this.createUserStatement = this.#db.prepare(this.#setUserSQL);
-    this.getUserByIdStatement = this.#db.prepare(this.#getUserByIdSQL);
-    this.getUserByUsernameStatement = this.#db.prepare(this.#getUserByUsernameSQL);
-    this.getUserByEmailStatement = this.#db.prepare(this.#getUserByEmailSQL);
-    this.getUserByRoleStatement = this.#db.prepare(this.#getUserByRoleSQL);
-    this.getUserByLocationStatement = this.#db.prepare(this.#getUserByLocationSQL);
-    this.getAllUsersStatement = this.#db.prepare(this.#getAllUsersSQL);
+    this.#createUserStatement = this.#db.prepare(this.#setUserSQL);
+    this.#getUserByIdStatement = this.#db.prepare(this.#getUserByIdSQL);
+    this.#getUserByUsernameStatement = this.#db.prepare(this.#getUserByUsernameSQL);
+    this.#getUserByEmailStatement = this.#db.prepare(this.#getUserByEmailSQL);
+    this.#getUserByRoleStatement = this.#db.prepare(this.#getUserByRoleSQL);
+    this.#getUserByLocationStatement = this.#db.prepare(this.#getUserByLocationSQL);
+    this.#getAllUsersStatement = this.#db.prepare(this.#getAllUsersSQL);
   }
 
-  async createUser(username, email, password) {
+  createUser(username, email, password) {
     return new Promise((resolve, reject) => {
-      this.createUserStatement.reset();
-      this.createUserStatement.run(username, email, password, (err) => {
-        console.log("started Create")
+      this.#createUserStatement.reset();
+      this.#createUserStatement.run(username, email, password, (err) => {
         if (err) {
           console.error(err.message);
-          console.log("started Create e")
           reject(err);
+        } else {
+          resolve();
         }
-        console.log("started Create s")
-        resolve()
       });
     });
-  };
+  }
 
   getUserById(id) {
-    let user;
-    this.getUserByIdStatement.reset();
-    this.getUserById.get(id, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        return
-      }
-      user = row;
+    return new Promise((resolve, reject) => {
+      this.#getUserByIdStatement.reset();
+      this.#getUserByIdStatement.get(id, (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
     });
-    return user;
   }
 
   getUserByUsername(username) {
-    let user;
-    this.getUserByUsernameStatement.reset();
-    this.getUserByUsername.get(username, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        return
-      }
-      user = row;
+    return new Promise((resolve, reject) => {
+      this.#getUserByUsernameStatement.reset();
+      this.#getUserByUsernameStatement.get(username, (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else {
+          console.log(row);
+          resolve(row);
+        }
+      });
     });
-    return user;
   }
 
   getUserByEmail(email) {
-    let user;
-    this.getUserByEmailStatement.reset();
-    this.getUserByEmail.get(email, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        return
-      }
-      user = row;
+    return new Promise((resolve, reject) => {
+      this.#getUserByEmailStatement.reset();
+      this.#getUserByEmailStatement.get(email, (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
     });
-    return user;
   }
 
   getUserByRole(role) {
-    let user;
-    this.getUserByRoleStatement.reset();
-    this.getUserByRole.get(role, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        return
-      }
-      user = row;
+    return new Promise((resolve, reject) => {
+      this.#getUserByRoleStatement.reset();
+      this.#getUserByRoleStatement.get(role, (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
     });
-    return user;
   }
 
   getUserByLocation(location) {
-    let user;
-    this.getUserByLocationStatement.reset();
-    this.getUserByLocation.get(location, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        return
-      }
-      user = row;
+    return new Promise((resolve, reject) => {
+      this.#getUserByLocationStatement.reset();
+      this.#getUserByLocationStatement.get(location, (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
     });
-    return user;
   }
 
-  async getAllUsers() {
+  getAllUsers() {
     return new Promise((resolve, reject) => {
-      this.getAllUsersStatement.reset();
-      this.getAllUsersStatement.all((err, rows) => {
+      this.#getAllUsersStatement.reset();
+      this.#getAllUsersStatement.all((err, rows) => {
         if (err) {
           console.error(err.message);
           reject(err);

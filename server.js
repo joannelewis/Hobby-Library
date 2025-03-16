@@ -2,11 +2,16 @@ const express = require('express');
 const mustacheExpress = require('mustache-express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const cookieParser = require('cookie-parser');
 const { User } = require('./models/user'); // Changed to CommonJS require
 
 // Database setup
+/**
+ * @type {sqlite3.Database}
+ */
 const database = new sqlite3.Database('./database.db', (err) => {
   if (err) console.error('Failed to connect to the database:', err);
+  console.log("Connected to the database")
 });
 
 // Create user instance
@@ -14,8 +19,6 @@ const user = new User(database);
 
 const app = express();
 const port = 5000;
-
-let isAuthenticated = false;
 
 // Mustache setup
 app.engine('mustache', mustacheExpress());
@@ -26,6 +29,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 
 // Proper layout middleware for mustache-express
 app.use((req, res, next) => {
@@ -41,8 +45,17 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.get('/', (_, res) => {
-  res.render('index', { message: 'Hello, Mustache!' });
+app.get('/', (req, res) => {
+  let isAuthenticated;
+  if (req.cookies && req.cookies.loggedIn) {
+    console.log("User is authenticated");
+    isAuthenticated = req.cookies.loggedIn === 'true';
+  } else {
+    console.log("User is not authenticated");
+    isAuthenticated = false;
+  }
+
+  res.render('index', { message: 'Hello, Mustache!', isAuthenticated: isAuthenticated ? "Logout" : "Login", authRoute: isAuthenticated ? "/logout" : "/login" });
 });
 
 app.get('/users', async (_, res) => {
@@ -60,19 +73,30 @@ app.get('/login', (_, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const username = req.body.username;
+  const email = req.body.email;
   const password = req.body.password;
 
-  // TODO: Implement proper login logic
-  // Example: const authenticated = await user.authenticateUser(username, password);
+  console.log(`Attempting login for username: ${email}`);
 
-  const user = user.getUserByUsername(username)
-  if (user.password === password) {
-    isAuthenticated = true;
-    res.redirect('/users')
+  try {
+    const userResult = await user.getUserByEmail(email);
+    console.log("User lookup result:", userResult);
+
+    if (userResult && userResult.password === password) {
+      console.log("Login successful");
+      return res.cookie("loggedIn", 'true').redirect('/');
+    } else {
+      console.log("Login failed - invalid credentials");
+      return res.redirect('/login');
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.redirect('/login');
   }
-  isAuthenticated = false;
-  res.redirect('/login')
+});
+
+app.get('/logout', (_, res) => {
+  return res.clearCookie("loggedIn").redirect('/');
 });
 
 app.get('/create-user', (_, res) => {
