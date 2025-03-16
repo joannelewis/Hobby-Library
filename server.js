@@ -15,12 +15,15 @@ const user = new User(database);
 const app = express();
 const port = 5000;
 
+let isAuthenticated = false;
+
 // Mustache setup
 app.engine('mustache', mustacheExpress());
 app.set('view engine', 'mustache');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -57,12 +60,19 @@ app.get('/login', (_, res) => {
 });
 
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const username = req.body.username;
+  const password = req.body.password;
 
   // TODO: Implement proper login logic
   // Example: const authenticated = await user.authenticateUser(username, password);
 
-  res.redirect('/');
+  const user = user.getUserByUsername(username)
+  if (user.password === password) {
+    isAuthenticated = true;
+    res.redirect('/users')
+  }
+  isAuthenticated = false;
+  res.redirect('/login')
 });
 
 app.get('/create-user', (_, res) => {
