@@ -1,0 +1,110 @@
+<div class="flex flex-1 mt-4 gap-4">
+  <!-- Sidebar -->
+  <div class="w-64 bg-secondary/80 rounded-md p-4">
+    <h2 class="text-xl font-bold mb-4">{{category.name}} Filters</h2>
+    
+    <div class="mb-4">
+      <h3 class="font-medium mb-2">Skill Level</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2"> Beginner
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2"> Intermediate
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2"> Advanced
+        </label>
+      </div>
+    </div>
+    
+    <div class="mb-4">
+      <h3 class="font-medium mb-2">Availability</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2"> Available Now
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2"> Available at My Location
+        </label>
+      </div>
+    </div>
+    
+    <div class="mb-4">
+      <h3 class="font-medium mb-2">Sort By</h3>
+      <select class="w-full p-2 border rounded">
+        <option>Popularity</option>
+        <option>Newest First</option>
+        <option>Alphabetical (A-Z)</option>
+      </select>
+    </div>
+    
+    <button class="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/80">
+      Apply Filters
+    </button>
+  </div>
+
+  <!-- Equipment Grid -->
+  <div class="flex-1 bg-white rounded-md p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">{{category.name}} Equipment</h2>
+      <p class="text-gray-600">Showing {{equipment.length}} items</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {{#equipment}}
+      <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div class="h-48 bg-gray-200 relative">
+          <img src="{{imageUrl}}" alt="{{name}}" class="w-full h-full object-cover">
+          <div class="absolute top-2 right-2">
+            {{#available}}
+            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Available</span>
+            {{/available}}
+            {{^available}}
+            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Checked Out</span>
+            {{/available}}
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-bold text-gray-800 mb-1">{{name}}</h3>
+          <p class="text-gray-600 text-sm mb-2">{{description}}</p>
+          <div class="flex justify-between items-center">
+            <span class="text-sm bg-gray-100 px-2 py-1 rounded">{{skillLevel}}</span>
+            <a href="/equipment/{{id}}" class="text-primary hover:underline">Details</a>
+          </div>
+        </div>
+      </div>
+      {{/equipment}}
+      
+      {{^equipment}}
+      <div class="col-span-full text-center py-10">
+        <p class="text-gray-500 text-lg">No equipment found for this category.</p>
+        <p class="text-gray-500">Try adjusting your filters or check back later!</p>
+      </div>
+      {{/equipment}}
+    </div>
+    
+    <!-- Pagination -->
+    {{#pagination}}
+    <div class="mt-8 flex justify-center">
+      <div class="flex space-x-1">
+        <a href="?page={{prev}}" class="px-4 py-2 border rounded {{^hasPrev}}opacity-50 cursor-not-allowed{{/hasPrev}}">Previous</a>
+        {{#pages}}
+          <a href="?page={{num}}" class="px-4 py-2 border rounded {{#active}}bg-primary text-white{{/active}}">{{num}}</a>
+        {{/pages}}
+        <a href="?page={{next}}" class="px-4 py-2 border rounded {{^hasNext}}opacity-50 cursor-not-allowed{{/hasNext}}">Next</a>
+      </div>
+    </div>
+    {{/pagination}}
+  </div>
+</div>
+
+<!-- Footer Message -->
+<div class="mt-4 mb-4 bg-secondary/80 rounded-md p-4 text-center">
+  <p class="text-black">
+    Ready to try {{category.name}}? Browse our equipment above and find something that interests you!
+    Remember, borrowing is completely commitment-free (just don't forget to return your materials!)
+    <br>
+    Have fun!
+  </p>
+</div>

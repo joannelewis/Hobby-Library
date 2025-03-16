@@ -4,6 +4,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const cookieParser = require('cookie-parser');
 const { User } = require('./models/user'); // Changed to CommonJS require
+const { EquipmentListing } = require('./models/equipmentListing'); // Changed to CommonJS require
 
 // Database setup
 /**
@@ -16,6 +17,7 @@ const database = new sqlite3.Database('./database.db', (err) => {
 
 // Create user instance
 const user = new User(database);
+const equipmentListing = new EquipmentListing(database);
 
 const app = express();
 const port = 5000;
@@ -45,17 +47,20 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.get('/', (req, res) => {
-  let isAuthenticated;
+app.get('/', async (req, res) => {
+  let isAuthenticated, userObj;
   if (req.cookies && req.cookies.loggedIn) {
     console.log("User is authenticated");
     isAuthenticated = req.cookies.loggedIn === 'true';
+    const userId = req.cookies.user;
+    userObj = await user.getUserById(userId);
+    console.log("User object:", userObj);
   } else {
     console.log("User is not authenticated");
     isAuthenticated = false;
   }
 
-  res.render('index', { message: 'Hello, Mustache!', isAuthenticated: isAuthenticated ? "Logout" : "Login", authRoute: isAuthenticated ? "/logout" : "/login" });
+  res.render('index', { message: 'Hello, Mustache!', isAuthenticated: isAuthenticated ? "Logout, " + userObj.username : "Login", authRoute: isAuthenticated ? "/logout" : "/login" });
 });
 
 app.get('/users', async (_, res) => {
@@ -66,6 +71,16 @@ app.get('/users', async (_, res) => {
     console.error('Error fetching users:', err);
     res.status(500).send('Error fetching users');
   }
+});
+
+app.get('/knitting', async (req, res) => {
+  let equipment = await equipmentListing.getEquipmentListingsByCategory("knitting");
+  // let equipmentListings = []
+  // equipment = equipment.forEach(e => {
+  //   equipmentListings.push(equipmentListing.getEquipmentListingByEquipmentId(e.equipment_id))
+  // })
+
+  res.render('equipment-listings', { equipment });
 });
 
 app.get('/login', (_, res) => {
@@ -84,7 +99,9 @@ app.post('/login', async (req, res) => {
 
     if (userResult && userResult.password === password) {
       console.log("Login successful");
-      return res.cookie("loggedIn", 'true').redirect('/');
+      return res.cookie("loggedIn", 'true')
+        .cookie("user", userResult.user_id)
+        .redirect('/');
     } else {
       console.log("Login failed - invalid credentials");
       return res.redirect('/login');
