@@ -57,12 +57,12 @@
         <div class="h-48 bg-gray-200 relative">
           <img src="{{imageUrl}}" alt="{{name}}" class="w-full h-full object-cover">
           <div class="absolute top-2 right-2">
-            {{#available}}
+            {{#availability}}
             <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Available</span>
-            {{/available}}
-            {{^available}}
+            {{/availability}}
+            {{^availability}}
             <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Checked Out</span>
-            {{/available}}
+            {{/availability}}
           </div>
         </div>
         <div class="p-4">
@@ -70,7 +70,7 @@
           <p class="text-gray-600 text-sm mb-2">{{description}}</p>
           <div class="flex justify-between items-center">
             <span class="text-sm bg-gray-100 px-2 py-1 rounded">{{skillLevel}}</span>
-            <a href="/equipment/{{id}}" class="text-primary hover:underline">Details</a>
+            <a href="/equipment/{{equipment_id}}" class="text-primary hover:underline">Details</a>
           </div>
         </div>
       </div>

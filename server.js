@@ -5,6 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cookieParser = require('cookie-parser');
 const { User } = require('./models/user'); // Changed to CommonJS require
 const { EquipmentListing } = require('./models/equipmentListing'); // Changed to CommonJS require
+const { Equipment } = require('./models/equipment'); // Changed to CommonJS require
 
 // Database setup
 /**
@@ -18,6 +19,7 @@ const database = new sqlite3.Database('./database.db', (err) => {
 // Create user instance
 const user = new User(database);
 const equipmentListing = new EquipmentListing(database);
+const equipment = new Equipment(database);
 
 const app = express();
 const port = 5000;
@@ -75,10 +77,11 @@ app.get('/users', async (_, res) => {
 
 app.get('/knitting', async (req, res) => {
   let equipment = await equipmentListing.getEquipmentListingsByCategory("knitting");
-  // let equipmentListings = []
-  // equipment = equipment.forEach(e => {
-  //   equipmentListings.push(equipmentListing.getEquipmentListingByEquipmentId(e.equipment_id))
-  // })
+  equipment.forEach(e => {
+    e.availability = e.quantity > 0
+  });
+
+  console.log(equipment);
 
   res.render('equipment-listings', { equipment });
 });
@@ -139,20 +142,20 @@ app.post('/create-user', async (req, res) => {
 // Admin Routes - Equipment Management
 app.get('/create-equipment', (req, res) => {
   // Fetch categories and locations from database if needed
-  const categories = []; 
-  const locations = []; 
-  
- res.render('create-equipment', { 
-    categories, 
+  const categories = [];
+  const locations = [];
+
+  res.render('create-equipment', {
+    categories,
     locations,
-    isAdmin: true 
+    isAdmin: true
   });
 });
 
 app.post('/create-equipment', async (req, res) => {
   try {
     // Extract form data
-    const { 
+    const {
       name, category, description, quantity, equipment_id, user_id, deposit_amount
     } = req.body;
 
@@ -166,63 +169,25 @@ app.post('/create-equipment', async (req, res) => {
 
 // Equipment details route
 app.get('/equipment/:id', async (req, res) => {
-  try {
-    const equipmentId = req.params.id;
-    
-    // Fetch equipment details
-    const equipment = {
-      id: equipmentId,
-      name: "Bamboo Knitting Needles Set",
-      category: "Knitting",
-      description: "A premium set of bamboo knitting needles in various sizes, perfect for beginners and experts alike.",
-      skillLevel: "All Levels",
-      loanPeriod: 14,
-      depositAmount: 20,
-      condition: "Excellent",
-      location: "Mississauga Valley Library",
-      imageUrl: "/images/knitting-needles.jpg",
-      available: true
-    };
-    
-    // Fetch related equipment
-    const relatedEquipment = [
-      {
-        id: "2",
-        name: "Merino Wool Yarn Bundle",
-        skillLevel: "Beginner",
-        imageUrl: "/images/yarn.jpg",
-        available: true
-      },
-      {
-        id: "3",
-        name: "Knitting Pattern Book",
-        skillLevel: "Intermediate",
-        imageUrl: "/images/pattern-book.jpg",
-        available: false
-      }
-    ];
-    
-    res.render('equipment-details', { equipment, relatedEquipment });
-  } catch (err) {
-    console.error(`Error fetching equipment details:`, err);
-    res.status(500).send('Error fetching equipment details');
-  }
+  // if (req.params && req.params.id) return res.status(400).send('Invalid equipment ID');
+  let equipmentResults = await equipment.getEquipmentById(req.params.id);
+  equipmentResults.availability = equipmentResults.quantity > 0;
+  res.render('equipment-details', { equipment: equipmentResults });
 });
 
 // Request to borrow route
 app.post('/equipment/:id/request', async (req, res) => {
-  try {
-    const equipmentId = req.params.id;
-    // Temp store the requested equipment ID in session
-    req.session.requestedEquipmentId = equipmentId;
-    
-    // Redirect to loan request form
-    res.redirect('/loan-request');
-  } catch (err) {
-    console.error('Error processing loan request:', err);
-    res.status(500).send('Error processing loan request');
-  }
-});
+  const equipmentId = req.params.id;
+  const equipmentResults = await equipment.getEquipmentById(equipmentId);
+  console.log("Equipment details:", equipmentResults);
+  res.render("loan-request", { equipment: equipmentResults });
+
+  // Redirect to loan request form
+  // res.redirect('/loan-request');
+  // console.error('Error processing loan request:', err);
+  // res.status(500).send('Error processing loan request');
+}
+);
 
 // Show loan request form
 app.get('/loan-request', async (req, res) => {
@@ -232,7 +197,7 @@ app.get('/loan-request', async (req, res) => {
     if (!equipmentId) {
       return res.redirect('/');
     }
-    
+
     // Fetch equipment details
     // In a real app, you'd get this from your database
     const equipment = {
@@ -244,20 +209,20 @@ app.get('/loan-request', async (req, res) => {
       location: "Mississauga Valley Library",
       //imageUrl: "/images/knitting-needles.jpg"
     };
-    
+
     // Calculate min/max dates for the form
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const maxDate = new Date(today);
     maxDate.setDate(maxDate.getDate() + 30);
-    
+
     const formatDate = (date) => {
       return date.toISOString().split('T')[0]; // YYYY-MM-DD format
     };
-    
-    res.render('loan-request', { 
+
+    res.render('loan-request', {
       equipment,
       minDate: formatDate(tomorrow),
       maxDate: formatDate(maxDate),
@@ -273,24 +238,24 @@ app.get('/loan-request', async (req, res) => {
 app.post('/loan-request', async (req, res) => {
   try {
 
-    const { 
-      equipmentId, 
-      pickupDate, 
-      returnDate, 
+    const {
+      equipmentId,
+      pickupDate,
+      returnDate,
       depositAmount,
       agreeToTerms
     } = req.body;
-    
+
     // Validate submission
     if (!equipmentId || !pickupDate || !returnDate || !depositAmount || !agreeToTerms) {
       return res.status(400).send('All fields are required');
     }
-    
+
     const loanId = "L" + Math.floor(100000 + Math.random() * 900000); // For demo
-    
+
     // Clear the session data
     req.session.requestedEquipmentId = null;
-    
+
     // Redirect to the loan confirmation page
     res.redirect(`/loans/${loanId}`);
   } catch (err) {
@@ -303,7 +268,7 @@ app.post('/loan-request', async (req, res) => {
 app.get('/loans/:id', async (req, res) => {
   try {
     const loanId = req.params.id;
-    
+
     const loan = {
       id: loanId,
       referenceNumber: loanId,
@@ -319,7 +284,7 @@ app.get('/loans/:id', async (req, res) => {
         //imageUrl: "/images/knitting-needles.jpg"
       }
     };
-    
+
     res.render('loan-confirmation', { loan });
   } catch (err) {
     console.error(`Error fetching loan details:`, err);
@@ -344,7 +309,7 @@ app.get('/my-loans', async (req, res) => {
         }
       }
     ];
-    
+
     res.render('my-loans', { loans });
   } catch (err) {
     console.error('Error fetching user loans:', err);
