@@ -27,6 +27,11 @@
         <a href="/crocheting" class="hover:underline">Crocheting</a>
         <a href="/painting" class="hover:underline">Painting</a>
         <a href="{{authRoute}}" class="hover:underline">{{isAuthenticated}}</a>
+        {{#isAuthenticated}}
+          <a href="/create-equipment">
+            Add Equipment
+          </a>
+        {{/isAuthenticated}}
       </div>
     </div>
   </nav>

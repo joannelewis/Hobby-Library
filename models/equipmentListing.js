@@ -1,4 +1,4 @@
-module.exports.EquipmentListing = class EquipmentListing {
+module.exports.EquipmentListing =  class EquipmentListing {
   #db;
   #setEquipmentListingSQL = 'INSERT INTO equipment_listings (equipment_id, name, quantity, deposit_amount, lender_id, lender_username, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
   #getEquipmentListingByIdSQL = 'SELECT * FROM equipment_listings WHERE listing_id = ?';

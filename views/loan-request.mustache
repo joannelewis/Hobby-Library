@@ -1,0 +1,196 @@
+<div class="flex flex-col min-h-screen">
+  <!-- Header -->
+  <header class="py-4 border-b border-white/20">
+    <div class="flex items-center gap-4">
+      <div class="w-24">
+        <img src="/images/library-logo.png" alt="Hobby Library" class="w-full">
+      </div>
+      <h1 class="text-4xl font-bold text-white">Welcome to the Hobby Library!</h1>
+    </div>
+  </header>
+
+  <!-- Navigation and Search -->
+  <nav class="bg-secondary/80 rounded-md mt-4 p-3">
+    <div class="flex items-center justify-between">
+      <div class="flex-1 max-w-md">
+        <div class="relative">
+          <input type="text" placeholder="Search" class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary">
+          <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex gap-8 text-black font-medium">
+        <a href="/knitting" class="hover:underline">Knitting</a>
+        <a href="/crocheting" class="hover:underline">Crocheting</a>
+        <a href="/painting" class="hover:underline">Painting</a>
+        <a href="/login" class="hover:underline">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="flex flex-1 mt-4">
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-md overflow-hidden">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Complete Your Loan Request</h1>
+        
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Equipment Summary</h2>
+          
+          <div class="overflow-hidden border border-gray-200 rounded-md">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Item
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Loan Period
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Required Deposit
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="h-10 w-10 flex-shrink-0">
+                        <img class="h-10 w-10 rounded-md object-cover" src="{{equipment.imageUrl}}" alt="{{equipment.name}}">
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">{{equipment.name}}</div>
+                        <div class="text-sm text-gray-500">{{equipment.category}}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{equipment.location}}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{equipment.loanPeriod}} days</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span class="font-semibold">${{equipment.depositAmount}}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <form action="/loan-request" method="POST" class="space-y-6">
+          <input type="hidden" name="equipmentId" value="{{equipment.id}}">
+          
+          <div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Loan Details</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="pickupDate" class="block text-sm font-medium text-gray-700 mb-1">
+                  Preferred Pickup Date
+                </label>
+                <input 
+                  type="date" 
+                  id="pickupDate" 
+                  name="pickupDate" 
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary"
+                  required
+                  min="{{minDate}}"
+                  max="{{maxDate}}"
+                >
+              </div>
+              
+              <div>
+                <label for="returnDate" class="block text-sm font-medium text-gray-700 mb-1">
+                  Expected Return Date
+                </label>
+                <input 
+                  type="date" 
+                  id="returnDate" 
+                  name="returnDate" 
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary"
+                  required
+                  min="{{minReturnDate}}"
+                >
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Deposit Payment</h2>
+            
+            <div>
+              <label for="depositAmount" class="block text-sm font-medium text-gray-700 mb-1">
+                Select Deposit Amount
+              </label>
+              <select
+                id="depositAmount"
+                name="depositAmount"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary"
+                required
+              >
+                <option value="" disabled selected>Select deposit amount</option>
+                <option value="20">$20 - Basic Deposit</option>
+                <option value="100">$100 - Premium Deposit</option>
+              </select>
+              <p class="mt-1 text-sm text-gray-500">
+                Your deposit is fully refundable when you return the equipment in good condition.
+              </p>
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">Terms & Conditions</h2>
+            
+            <div class="bg-gray-50 p-4 rounded-md">
+              <p class="text-sm text-gray-600 mb-4">
+                By requesting this equipment, you agree to:
+              </p>
+              <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1 mb-4">
+                <li>Return the equipment by the agreed return date</li>
+                <li>Return the equipment in the same condition you received it</li>
+                <li>Pay for any damages beyond normal wear and tear</li>
+                <li>Forfeit your deposit if equipment is not returned within 7 days of due date</li>
+              </ul>
+              
+              <label class="flex items-center">
+                <input type="checkbox" name="agreeToTerms" required class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <span class="ml-2 block text-sm text-gray-700">
+                  I agree to the terms and conditions
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+            <a href="/equipment/{{equipment.id}}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              Confirm Request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Message -->
+  <div class="mt-4 mb-4 bg-secondary/80 rounded-md p-4 text-center">
+    <p class="text-black">
+      Almost there! Complete your loan request to borrow this item.
+      Remember, borrowing is completely commitment-free (just don't forget to return your materials!)
+    </p>
+  </div>
+</div>
